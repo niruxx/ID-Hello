@@ -96,8 +96,8 @@ local function make_button(parent_id, label, on_click)
             border         = { left = { Px = 3 }, right = { Px = 3 },
                                top  = { Px = 3 }, bottom = { Px = 3 } },
         },
-        -- BackgroundColor = { C.btn },
-        -- BorderColor     = { C.border },
+        BackgroundColor = { C.btn },
+        BorderColor     = { C.border },
         BorderRadius    = { top_left    = { Px = 2 }, top_right    = { Px = 2 },
                             bottom_left = { Px = 2 }, bottom_right = { Px = 2 } },
     }):with_parent(parent_id)
@@ -109,10 +109,10 @@ local function make_button(parent_id, label, on_click)
     }):with_parent(btn:id())
 
     btn:observe("Pointer<Over>",  function(_, b)
-        -- b:patch({ BackgroundColor = { C.btn_hover }, BorderColor = { color = C.border_hot } })
+        b:patch({ BackgroundColor = { C.btn_hover }, BorderColor = { color = C.border_hot } })
     end)
     btn:observe("Pointer<Out>",   function(_, b)
-        -- b:patch({ BackgroundColor = { color = C.btn      }, BorderColor = { color = C.border     } })
+        b:patch({ BackgroundColor = { color = C.btn      }, BorderColor = { color = C.border     } })
     end)
     btn:observe("Pointer<Click>", function(world, _) on_click(world) end)
 
@@ -129,7 +129,7 @@ local function make_small_btn(parent_id, label, on_click)
             border = { left = { Px = 2 }, right = { Px = 2 },
                        top  = { Px = 2 }, bottom = { Px = 2 } },
         },
-        -- BackgroundColor = { color = C.btn },
+        BackgroundColor = { color = C.btn },
         BorderColor     = { color = C.border },
         BorderRadius    = { top_left    = { Px = 2 }, top_right    = { Px = 2 },
                             bottom_left = { Px = 2 }, bottom_right = { Px = 2 } },
@@ -142,10 +142,10 @@ local function make_small_btn(parent_id, label, on_click)
     }):with_parent(btn:id())
 
     btn:observe("Pointer<Over>",  function(_, b)
-        -- b:patch({ BackgroundColor = { color = C.btn_hover }, BorderColor = { color = C.border_hot } })
+        b:patch({ BackgroundColor = { color = C.btn_hover }, BorderColor = { color = C.border_hot } })
     end)
     btn:observe("Pointer<Out>",   function(_, b)
-        -- b:patch({ BackgroundColor = { color = C.btn      }, BorderColor = { color = C.border     } })
+        b:patch({ BackgroundColor = { color = C.btn      }, BorderColor = { color = C.border     } })
     end)
     btn:observe("Pointer<Click>", function(world, _) on_click(world) end)
 
@@ -170,7 +170,7 @@ local function pixel_rule(parent_id, width_px, margin_top, margin_bottom)
             height = { Px = 4 },
             margin = { top = { Px = margin_top or 0 }, bottom = { Px = margin_bottom or 0 } },
         },
-        -- BackgroundColor = { color = C.accent },
+        BackgroundColor = { color = C.accent },
     }):with_parent(parent_id)
 end
 
@@ -223,7 +223,7 @@ register_system("First", function(world)
             justify_content = "Center",
             align_items     = "Center",
         },
-        -- BackgroundColor = { color = C.void },
+        BackgroundColor = { color = C.void },
         GlobalZIndex    = { value = 200 },
     })
     state.root_id = root:id()
@@ -242,7 +242,7 @@ register_system("First", function(world)
                 width  = { Px = sz },
                 height = { Px = sz },
             },
-            -- BackgroundColor = { color = { r = 0.85, g = 0.90, b = 1.0, a = 0.5 } },
+            BackgroundColor = { color = { r = 0.85, g = 0.90, b = 1.0, a = 0.5 } },
         }):with_parent(state.root_id)
 
         state.star_ids[i] = {
@@ -263,7 +263,7 @@ register_system("First", function(world)
                 top    = { Percent = i * 8.5 },
                 height = { Px = 2 },
             },
-            -- BackgroundColor = { color = { r = 0, g = 0, b = 0, a = 0.08 } },
+            BackgroundColor = { color = { r = 0, g = 0, b = 0, a = 0.08 } },
         }):with_parent(state.root_id)
     end
 
@@ -314,7 +314,7 @@ register_system("First", function(world)
             padding        = { left = { Px = 28 }, right  = { Px = 28 },
                                top  = { Px = 24 }, bottom = { Px = 24 } },
         },
-        -- BackgroundColor = { color = C.panel },
+        BackgroundColor = { color = C.panel },
         BorderRadius    = { top_left    = { Px = 4 }, top_right    = { Px = 4 },
                             bottom_left = { Px = 4 }, bottom_right = { Px = 4 } },
     }):with_parent(col_id)
@@ -371,7 +371,7 @@ register_system("First", function(world)
             align_items     = "Center",
             display         = "None",
         },
-        -- BackgroundColor = { color = C.overlay },
+        BackgroundColor = { color = C.overlay },
         GlobalZIndex    = { value = 210 },
     }):with_parent(state.root_id)
     state.options_panel_id = opts_overlay:id()
@@ -385,7 +385,7 @@ register_system("First", function(world)
                                top  = { Px = 28 }, bottom = { Px = 28 } },
             row_gap        = { Px = 2 },
         },
-        -- BackgroundColor = { color = C.card },
+        BackgroundColor = { color = C.card },
         BorderRadius    = { top_left    = { Px = 4 }, top_right    = { Px = 4 },
                             bottom_left = { Px = 4 }, bottom_right = { Px = 4 } },
     }):with_parent(opts_overlay:id())
@@ -533,10 +533,9 @@ register_system("Update", function(world)
             local alpha = 0.15 + 0.80 * (math.sin(t * star.speed + star.phase) * 0.5 + 0.5)
             local e = world:get_entity(star.id)
             if e then
-                -- e:patch({ BackgroundColor = { r = 0.85, g = 0.90, b = 1.0, a = alpha } } )
+                e:patch({ BackgroundColor = { r = 0.85, g = 0.90, b = 1.0, a = alpha } } )
             end
         end
-    end
     end
 
     -- "PRESS START" blink (every 0.55 s)

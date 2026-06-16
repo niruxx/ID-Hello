@@ -178,7 +178,7 @@ register_system("PreUpdate", function(world)
             net_mod = {
                 { player = {} },
                 { title_screen = {} },
-                { input = {} },
+                { input = { input_mode = "ui" } },
                 { ["camera/2d"] = {}, net_sync = { authority = "client", target = "owner" } },
                 { ["movement/2d"] = { speed = 160.0 } },
                 { ["animation/sprite"] = {

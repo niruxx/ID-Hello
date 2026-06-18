@@ -10,8 +10,13 @@
 -- Top-level actions (e.g. open_menu) are local-only (no output component).
 --
 -- input_mode: "game" (default) or "ui"
---   "game" → all "game" + "always" actions active, cursor confined+hidden
---   "ui"   → only "always" actions active, cursor visible+free
+--   "game" → all "game" + "always" actions active
+--   "ui"   → only "always" actions active
+--
+-- input.hide_cursor: boolean (default true) — independent of input_mode.
+--   Cursor is visible+free whenever input_mode == "ui" OR hide_cursor == false.
+--   Cursor is hidden+confined only when input_mode == "game" AND hide_cursor == true.
+--   (3D mouse-look cameras want the default true; 2D games set hide_cursor = false.)
 --
 -- Multi-binding support:
 --   An action can be a single binding or an array of bindings:
@@ -40,7 +45,7 @@ local input_state = define_resource("InputState", {
     prev_mouse_pressed = {}, -- mouse button -> boolean (last frame)
     prev_vr_pressed = {}, -- vr button -> boolean (last frame)
     prev_output = {}, -- for change detection
-    last_mode = {}, -- for cursor toggling
+    last_cursor_state = {}, -- for cursor toggling
     warned_conflicts = {} -- for spam prevention
 })
 
@@ -201,14 +206,17 @@ register_system("Update", function(world)
     for _, entity in ipairs(entities) do
         local input = entity:get("input")
         local input_mode = input.input_mode or "game"
+        local hide_cursor = input.hide_cursor
+        if hide_cursor == nil then hide_cursor = true end
 
-        -- Detect input_mode changes → toggle CursorOptions
-        local last_mode = input_state.last_mode[entity:id()]
-        if last_mode ~= input_mode then
-            input_state.last_mode[entity:id()] = input_mode
+        -- Detect input_mode/hide_cursor changes → toggle CursorOptions
+        local cursor_state = input_mode .. ":" .. tostring(hide_cursor)
+        local last_cursor_state = input_state.last_cursor_state[entity:id()]
+        if last_cursor_state ~= cursor_state then
+            input_state.last_cursor_state[entity:id()] = cursor_state
             local windows = world:query({ with = { "Window", "CursorOptions" } })
             if #windows > 0 then
-                if input_mode == "ui" then
+                if input_mode == "ui" or not hide_cursor then
                     windows[1]:set({ CursorOptions = {
                         visible = true,
                         grab_mode = "None",

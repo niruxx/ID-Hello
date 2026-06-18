@@ -5,8 +5,9 @@
 local BINDINGS = require("modules/movement/shared/bindings.lua")
 local Movement = require("modules/movement/shared/movement.lua")
 
-local ACCEL_RATE = 14.0   -- lerp fraction/sec when accelerating
-local DECEL_RATE = 20.0   -- lerp fraction/sec when decelerating
+local state = define_resource("Movement2dServerState", {
+    vel = {},     -- [entity_id] -> { x, y }
+})
 
 ---------------------------------------------------------------------------
 -- Init: register bindings, set net_sync authority, ensure physics components
@@ -47,7 +48,7 @@ end)
 register_system("Update", function(world)
     local dt      = world:delta_time()
     local entities = world:query({
-        with = { "input_movement", "movement/2d", "Velocity2d", "camera/2d" },
+        with = { "input_movement", "movement/2d", "camera/2d", "Transform" },
     })
     for _, entity in ipairs(entities) do
         local input = entity:get("input_movement")
@@ -57,25 +58,24 @@ register_system("Update", function(world)
         local speed   = mv.speed or Movement.MOVE_SPEED
         local moving  = input.forward or input.backward or input.left or input.right
         local desired = moving and Movement.compute_velocity2d(input, speed) or { x = 0, y = 0 }
-        local cur_vel = entity:get("Velocity2d") or {}
-        local linvel  = cur_vel.linvel or {}
 
-        local is_moving = math.abs(desired.x) + math.abs(desired.y) > 0.1
-        local rate      = is_moving and ACCEL_RATE or DECEL_RATE
-        local t         = math.min(1.0, rate * dt)
+        local eid = entity:id()
+        local pv  = state.vel[eid] or { x = 0, y = 0 }
+        local new_vel = Movement.smooth_velocity2d(pv, desired, dt)
+        state.vel[eid] = new_vel
 
-        local cur_vx = linvel.x or 0
-        local cur_vy = linvel.y or 0
-        local new_vx = cur_vx + (desired.x - cur_vx) * t
-        local new_vy = cur_vy + (desired.y - cur_vy) * t
-
-        if math.abs(new_vx - cur_vx) > 0.01 or math.abs(new_vy - cur_vy) > 0.01
-            or math.abs(cur_vel.angvel or 0) > 0.001 then
-            entity:set({ Velocity2d = {
-                linvel = { x = new_vx, y = new_vy },
-                angvel = 0,
-            }})
+        local t = entity:get("Transform")
+        if t and t.translation then
+            entity:patch({ Transform = { translation = {
+                x = t.translation.x + new_vel.x * dt,
+                y = t.translation.y + new_vel.y * dt,
+                z = t.translation.z,
+            }}})
         end
+
+        -- Publish velocity for other systems (e.g. sprite animation facing/state)
+        -- to read. Not used for movement integration itself anymore.
+        entity:set({ Velocity2d = { linvel = { x = new_vel.x, y = new_vel.y }, angvel = 0 } })
 
         ::continue::
     end

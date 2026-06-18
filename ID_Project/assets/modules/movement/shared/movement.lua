@@ -76,6 +76,25 @@ function M.compute_velocity2d(input, speed)
     }
 end
 
+M.ACCEL_RATE_2D = 14.0   -- lerp fraction/sec when accelerating (2D top-down)
+M.DECEL_RATE_2D = 20.0   -- lerp fraction/sec when decelerating (2D top-down)
+
+--- Smooth a 2D velocity toward the desired velocity at accel/decel rate.
+--- Shared by client (prediction) and server (authoritative) so both move identically.
+--- @param cur  current velocity { x, y }
+--- @param desired  desired velocity { x, y }
+--- @param dt  delta time
+--- @return table { x, y } smoothed velocity
+function M.smooth_velocity2d(cur, desired, dt)
+    local is_moving = math.abs(desired.x) + math.abs(desired.y) > 0.1
+    local rate = is_moving and M.ACCEL_RATE_2D or M.DECEL_RATE_2D
+    local t = math.min(1.0, rate * dt)
+    return {
+        x = (cur.x or 0) + (desired.x - (cur.x or 0)) * t,
+        y = (cur.y or 0) + (desired.y - (cur.y or 0)) * t,
+    }
+end
+
 --- Compute target rotation quaternion from horizontal velocity.
 --- Returns nil if velocity is too small.
 --- @param world  ECS world (for static method calls)

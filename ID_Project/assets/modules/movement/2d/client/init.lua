@@ -1,16 +1,17 @@
 -- modules/movement/2d/client/init.lua
--- Client-side movement: registers input bindings, runs smoothed local prediction,
--- and interpolates toward server-authoritative Transform.
+-- Client-side movement: mirrors the server movement logic exactly.
+-- Both client and server run physics (Velocity2d integration into Transform).
+-- The client writes Velocity2d from input; physics integrates it into Transform.
+-- Remote avatars are interpolated toward the server snapshot here.
 
 local BINDINGS     = require("modules/movement/shared/bindings.lua")
 local Movement     = require("modules/movement/shared/movement.lua")
 
-local CLIENT_ACCEL = 16.0   -- lerp fraction/sec when accelerating (client prediction)
-local CLIENT_DECEL = 22.0   -- lerp fraction/sec when decelerating (client prediction)
 local INTERP_SPEED = 16.0   -- lerp fraction/sec for server-position correction
 
--- Per-entity predicted velocity (module-local, never synced)
-local pred_vels = {}   -- [entity_id] → { vx, vy }
+local state = define_resource("Movement2dClientState", {
+    vel = {},     -- [entity_id] -> { x, y }
+})
 
 local function has_movement_input(input)
     return input and (input.forward or input.backward or input.left or input.right)
@@ -36,7 +37,9 @@ register_system("First", function(world)
 end)
 
 ---------------------------------------------------------------------------
--- Client-side prediction: smoothed acceleration matching the server rates
+-- Produce the local player's intended velocity from input.
+-- Mirrors server movement logic exactly (shared smoothing function) so
+-- physics integrates Velocity2d into Transform the same way on both sides.
 ---------------------------------------------------------------------------
 register_system("Update", function(world)
     local dt = world:delta_time()
@@ -54,38 +57,39 @@ register_system("Update", function(world)
         local desired = moving and Movement.compute_velocity2d(input, speed) or { x = 0, y = 0 }
 
         local eid = entity:id()
-        local pv  = pred_vels[eid] or { vx = 0, vy = 0 }
+        local pv  = state.vel[eid] or { x = 0, y = 0 }
+        local new_vel = Movement.smooth_velocity2d(pv, desired, dt)
+        state.vel[eid] = new_vel
 
-        local is_moving = math.abs(desired.x) + math.abs(desired.y) > 0.1
-        local rate      = is_moving and CLIENT_ACCEL or CLIENT_DECEL
-        local t         = math.min(1.0, rate * dt)
-
-        pv.vx = pv.vx + (desired.x - pv.vx) * t
-        pv.vy = pv.vy + (desired.y - pv.vy) * t
-        pred_vels[eid] = pv
-
-        local tr = entity:get("Transform")
-        if tr and tr.translation and (math.abs(pv.vx) + math.abs(pv.vy) > 0.01) then
+        local t = entity:get("Transform")
+        if t and t.translation then
             entity:patch({ Transform = { translation = {
-                x = tr.translation.x + pv.vx * dt,
-                y = tr.translation.y + pv.vy * dt,
-                z = tr.translation.z,
+                x = t.translation.x + new_vel.x * dt,
+                y = t.translation.y + new_vel.y * dt,
+                z = t.translation.z,
             }}})
         end
+
+        -- Publish velocity for other systems (e.g. sprite animation facing/state)
+        -- to read. Not used for movement integration itself anymore.
+        entity:set({ Velocity2d = { linvel = { x = new_vel.x, y = new_vel.y }, angvel = 0 } })
 
         ::continue::
     end
 end, { label = "Movement", after = { "Input" } })
 
 ---------------------------------------------------------------------------
--- Interpolation: smoothly blend prediction with server-authoritative position
+-- Interpolation for REMOTE avatars (not net_local): lerp toward the
+-- server-authoritative net_sync_Transform. The local player is driven by
+-- its own prediction above, so it is excluded here (matches 3D movement).
 ---------------------------------------------------------------------------
 register_system("Update", function(world)
     local dt = world:delta_time()
     local t  = math.min(1.0, INTERP_SPEED * dt)
 
     local entities = world:query({
-        with = { "movement/2d", "net_sync_Transform", "Transform" },
+        with    = { "movement/2d", "net_sync_Transform", "Transform" },
+        without = { "net_local" },
     })
     for _, entity in ipairs(entities) do
         local net_transform = entity:get("net_sync_Transform")

@@ -166,7 +166,7 @@ register_system("PreUpdate", function(world)
             GravityScale2d = 0.0,
             net_owner = { client_id = client_id },
             net_sync = {
-                Transform = { authority = "server", reliable = false },
+                Transform = { authority = "server", reliable = false, predict = true },
                 RigidBody2d = { authority = "server" },
                 Collider2d = { authority = "server" },
                 LockedAxes2d = { authority = "server" },
@@ -178,7 +178,7 @@ register_system("PreUpdate", function(world)
             net_mod = {
                 { player = {} },
                 { title_screen = {} },
-                { input = { input_mode = "ui" } },
+                { input = { input_mode = "game", hide_cursor = false } },
                 { ["camera/2d"] = {}, net_sync = { authority = "client", target = "owner" } },
                 { ["movement/2d"] = { speed = 160.0 } },
                 { ["animation/sprite"] = {

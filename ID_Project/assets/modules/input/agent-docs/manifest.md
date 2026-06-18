@@ -93,6 +93,18 @@ extra branching.
 - `mode = "always"` — always active regardless of input_mode
 - `mode = "ui"` — only active when `input_mode == "ui"`
 
+## Cursor
+
+Cursor visibility is independent of binding gating, controlled by `input.hide_cursor`
+(default `true`):
+
+- Visible + free whenever `input_mode == "ui"` OR `hide_cursor == false`
+- Hidden + confined only when `input_mode == "game"` AND `hide_cursor == true`
+
+3D mouse-look cameras (first/third person) rely on the default `true`. 2D games that
+don't use mouse-look set `hide_cursor = false` so the cursor stays visible during
+gameplay while `mode = "game"` bindings remain active.
+
 ## Conflict Detection
 
 Warns when two actions bind the same key:

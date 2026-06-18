@@ -15,7 +15,13 @@ local PITCH_LIMIT = 1.4  -- radians (~80°)
 -- Init: register look bindings + first-person camera defaults.
 ---------------------------------------------------------------------------
 register_system("First", function(world)
-    for _, entity in ipairs(world:query({ added = { "camera/first_person" } })) do
+    local entities = world:query({
+        ["or"] = {
+            added = { "camera/first_person", "net_local" },
+        },
+        with = { "camera/first_person", "net_local" },
+    })
+    for _, entity in ipairs(entities) do
         entity:patch({
             input = { camera = BINDINGS },
         })
@@ -80,7 +86,7 @@ end, { label = "Camera", after = { "Input" } })
 -- Positioning: snap the Camera3d child to the player's eyes, looking along
 -- the yaw/pitch direction.
 ---------------------------------------------------------------------------
-register_system("Update", function(world)
+register_system("PostUpdate", function(world)
     local cameras = world:query({
         with = { "camera", "camera/first_person", "Transform" },
     })
@@ -115,6 +121,6 @@ register_system("Update", function(world)
 
         ::continue::
     end
-end, { label = "CameraPosition", after = { "Camera", "Movement" } })
+end, { label = "CameraPosition" })
 
 return { base = "camera" }

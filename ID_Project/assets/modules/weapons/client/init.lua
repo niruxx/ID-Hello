@@ -22,6 +22,7 @@ local proj_anims        = {}   -- [entity_id] → { timer, visual_id, kind }
 local nova_visuals      = {}   -- [entity_id] → { vis_id, full_size }
 local explosion_visuals = {}   -- [entity_id] → { vis_id, total_lifetime, radius }
 local flash_timers      = {}   -- [flash_entity_id] → { timer, total, base_size }
+local img               = load_asset("character-spritesheet.png")
 
 ---------------------------------------------------------------------------
 -- Elapsed time counter (owned here; hud/client reads from the shared resource)
@@ -56,7 +57,6 @@ end
 -- Helper: spawn a short-lived muzzle flash at world position
 ---------------------------------------------------------------------------
 local function spawn_flash(x, y, z, size, r, g, b)
-    local img   = load_asset("character-spritesheet.png")
     local flash = spawn({
         Transform = { translation = { x = x, y = y, z = z } },
         Sprite    = {
@@ -178,8 +178,6 @@ end, { label = "WeaponFire", after = { "Movement" } })
 -- Projectile visuals: spawn sprite children for railgun and explosives
 ---------------------------------------------------------------------------
 register_system("Update", function(world)
-    local img = load_asset("character-spritesheet.png")
-
     for _, entity in ipairs(world:query({
         added   = { "projectile" },
         without = { "weapon_visual_spawned" },
@@ -268,8 +266,7 @@ register_system("Update", function(world)
     local EXPAND_DUR    = 0.35
     local FADE_THRESH   = 0.5
     local NOVA_LIFETIME = 2.0   -- must match server NOVA_LIFETIME constant
-    local img = load_asset("character-spritesheet.png")
-
+    
     -- Spawn visual on newly-arrived nova_zone entities
     for _, entity in ipairs(world:query({
         added   = { "nova_zone" },
@@ -334,8 +331,6 @@ end)
 -- Explosion ring: react to server-spawned explosion_effect entities
 ---------------------------------------------------------------------------
 register_system("Update", function(world)
-    local img = load_asset("character-spritesheet.png")
-
     -- Spawn ring visual on newly-arriving explosion_effect entities
     for _, entity in ipairs(world:query({
         added   = { "explosion_effect" },

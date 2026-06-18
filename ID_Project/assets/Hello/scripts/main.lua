@@ -53,11 +53,9 @@ end)
 -- Center the window on the primary monitor at startup
 register_system("First", function(world)
     for _, win in ipairs(world:query({ with = { "Window" } })) do
-        pcall(function()
-            win:patch({ Window = { position = { Centered = {} } } })
-        end)
-        break
+        win:patch({ Window = { position = { Centered = {} } } })
     end
+    return true
 end)
 
 -- Generate a stable player identity for this session.

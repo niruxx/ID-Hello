@@ -7,10 +7,13 @@ local BINDINGS = require("modules/camera/2d/shared/bindings.lua")
 -- Init: register local bindings, set defaults, spawn Camera2d entity
 ---------------------------------------------------------------------------
 register_system("First", function(world)
-    for _, entity in ipairs(world:query({
-        added = { "camera/2d" },
-        optional = { "net_transfer" },
-    })) do
+    local entities = world:query({
+        ["or"] = {
+            added = { "camera/2d", "net_local" },
+        },
+        with = { "camera/2d", "net_local" },
+    })
+    for _, entity in ipairs(entities) do
         local cfg = entity:get("camera/2d") or {}
 
         entity:patch({
@@ -69,7 +72,7 @@ end, { label = "Camera2dInput", after = { "Input" } })
 -- Follow player in the XY plane. Zoom is applied through Transform scale so
 -- this stays inside the Lua component surface we already use elsewhere.
 ---------------------------------------------------------------------------
-register_system("Update", function(world)
+register_system("PostUpdate", function(world)
     for _, entity in ipairs(world:query({
         with = { "camera/2d", "Transform" },
     })) do
@@ -99,4 +102,4 @@ register_system("Update", function(world)
 
         ::continue::
     end
-end, { label = "Camera2dPosition", after = { "MovementInterpolation", "Movement2d" } })
+end, { label = "CameraPosition", after = { "Movement" } })

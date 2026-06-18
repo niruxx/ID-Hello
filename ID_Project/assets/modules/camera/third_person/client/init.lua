@@ -9,7 +9,12 @@ local BINDINGS = require("modules/camera/third_person/shared/bindings.lua")
 -- Init: spawn Camera3d + register bindings
 ---------------------------------------------------------------------------
 register_system("First", function(world)
-    local entities = world:query({ added = { "camera/third_person" } })
+    local entities = world:query({
+        ["or"] = {
+            added = { "camera/third_person", "net_local" },
+        },
+        with = { "camera/third_person", "net_local" },
+    })
     for _, entity in ipairs(entities) do
         -- Register camera bindings (local-only, no sync output)
         entity:patch({ input = { camera = BINDINGS } })
@@ -94,10 +99,10 @@ end, { label = "Camera", after = { "Input" } })
 ---------------------------------------------------------------------------
 -- Camera positioning: orbit behind the player using child camera entity
 ---------------------------------------------------------------------------
-register_system("Update", function(world)
+register_system("PostUpdate", function(world)
     local net_info = define_resource("NetInfo", {})
     local my_scope_key = net_info.scope_key
-    
+
     local cameras = world:query({
         with = { "camera", "camera/third_person", "input", "Transform" },
     })
@@ -142,6 +147,6 @@ register_system("Update", function(world)
 
         ::continue::
     end
-end, { label = "CameraPosition", after = { "Camera", "Movement" } })
+end, { label = "CameraPosition" })
 
 return { base = "camera" }

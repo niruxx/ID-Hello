@@ -1,5 +1,5 @@
 {
-  "version": "v0.4.16",
+  "version": "v0.4.17",
   "files": [
     {
       "path": "effects/energy_burst.effect",
@@ -28,26 +28,6 @@
     {
       "path": "Hello/scripts/server/main.lua",
       "sha256": "a0bef828d9c671ef1450d70e21246684a3ba4ac8324cc1fbed0d5185d213443a"
-    },
-    {
-      "path": "icons/account.png",
-      "sha256": "8f016ce0efc7b1aeb8adfcc1242d678b3a3b8867cc384698ccb89731cd0ff834"
-    },
-    {
-      "path": "icons/files.png",
-      "sha256": "0c12ee96448b676f4da9ee91fdd5d898422cb5911d52210286e28a016ffe5c35"
-    },
-    {
-      "path": "icons/github.png",
-      "sha256": "1b98122e9e44fdab84c0fea792778a116e7271718006e1fdcc8a77a2a045c417"
-    },
-    {
-      "path": "icons/profiler.png",
-      "sha256": "a78d9356c8c212db5cf4a20f3d92e8aafbf7b880f4de250d7c0c7cbb2b5ed56f"
-    },
-    {
-      "path": "icons/settings.png",
-      "sha256": "4044cf6f43e37b09aa09e3d12e3a53678776153036d394a5bfbbc78f83b15c21"
     },
     {
       "path": "modules/abilities/agent-docs/manifest.md",
@@ -711,7 +691,7 @@
     },
     {
       "path": "shaders/dynamic_material_dispatch.wgsl",
-      "sha256": "6d65f8a4a5f13892d879d9b9178a77b7352ef6f373e41633c941cc0c8684eb77"
+      "sha256": "5ba3d3c9f3af429748278dc45c910fde644e45a3a650ec957837a15393f75075"
     },
     {
       "path": "shaders/materials/dissolve.wgsl",

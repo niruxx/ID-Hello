@@ -32,7 +32,7 @@ register_system("First", function(world)
 end)
 
 register_system("Update", function(world)
-    if fade.done then return end
+    if fade.done or not fade.overlay_id then return end
     local dt = world:delta_time()
     fade.alpha = fade.alpha - dt * 0.33  -- ~3 s fade
     if fade.alpha <= 0.0 then
@@ -46,5 +46,20 @@ register_system("Update", function(world)
             e:patch({ BackgroundColor = { color = { r = 0, g = 0, b = 0, a = fade.alpha } } })
         end
     end
+end)
+
+-- Background music: loop for the full session
+register_system("First", function(world)
+    local ok, music = pcall(load_asset, "sounds/song_intro_1.wav")
+    if ok and music then
+        spawn({
+            AudioPlayer      = music,
+            PlaybackSettings = { mode = "Loop", volume = { Linear = 0.25 } },
+        })
+        print("[GAME] Background music started (sounds/song_intro_1.wav)")
+    else
+        print("[GAME] WARNING: Could not load sounds/song_intro_1.wav — music skipped")
+    end
+    return true
 end)
 

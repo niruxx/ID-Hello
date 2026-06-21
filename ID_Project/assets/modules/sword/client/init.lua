@@ -17,6 +17,7 @@ local slashes    = {}   -- [entity_id] → elapsed_seconds (number)
 
 local img = load_asset("character-spritesheet.png")
 
+
 ---------------------------------------------------------------------------
 -- Elapsed counter
 ---------------------------------------------------------------------------
@@ -58,6 +59,7 @@ register_system("Update", function(world)
         ::continue::
     end
 end, { label = "CursorFacing", after = { "Input" } })
+
 
 ---------------------------------------------------------------------------
 -- Init: register left-mouse binding on the player's input component

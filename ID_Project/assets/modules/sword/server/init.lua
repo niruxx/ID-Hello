@@ -1,0 +1,3 @@
+-- modules/sword/server/init.lua
+-- Sword visuals and input are handled entirely on the owning client.
+-- No server-side logic needed.

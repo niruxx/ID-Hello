@@ -40,15 +40,34 @@ register_system("Update", function(world)
         local vx = vel.linvel.x or 0
         local vy = vel.linvel.y or 0
         local speed = math.sqrt(vx * vx + vy * vy)
-        local facing = anim.facing or "down"
-        if speed > 0.1 then
+
+        -- Walk vs idle: prefer input_movement (reliably synced client→server) over
+        -- Velocity2d, which can read as zero depending on system scheduling order.
+        local is_moving = false
+        local im = entity:get("input_movement")
+        if im then
+            is_moving = (im.forward or im.backward or im.left or im.right) and true or false
+        else
+            is_moving = speed > 0.1
+        end
+
+        -- Facing direction: cursor_facing (sent by owning client) takes priority.
+        -- Falls back to velocity direction, then last known facing.
+        local facing
+        local cf = entity:get("cursor_facing")
+        if cf and cf.dir then
+            facing = cf.dir
+        elseif speed > 0.1 then
             if math.abs(vx) > math.abs(vy) then
                 facing = vx > 0 and "right" or "left"
             else
                 facing = vy < 0 and "down" or "up"
             end
+        else
+            facing = anim.facing or "down"
         end
-        local new_state = speed > 0.1 and ("walk_" .. facing) or ("idle_" .. facing)
+
+        local new_state = is_moving and ("walk_" .. facing) or ("idle_" .. facing)
         local new_speed = 1.0
 
         if anim.state ~= new_state or anim.speed ~= new_speed or anim.facing ~= facing then

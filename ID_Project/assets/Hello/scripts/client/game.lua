@@ -34,7 +34,7 @@ end)
 register_system("Update", function(world)
     if fade.done then return end
     local dt = world:delta_time()
-    fade.alpha = fade.alpha - dt * 0.67  -- ~1.5 s fade
+    fade.alpha = fade.alpha - dt * 0.33  -- ~3 s fade
     if fade.alpha <= 0.0 then
         fade.alpha = 0.0
         fade.done  = true

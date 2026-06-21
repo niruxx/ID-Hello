@@ -25,6 +25,41 @@ register_system("PreUpdate", function(world)
 end)
 
 ---------------------------------------------------------------------------
+-- Cursor facing: every frame resolve which of the 4 directions the cursor
+-- is in relative to the window centre and patch cursor_facing on the player.
+-- cursor_facing is synced to the server (authority = "client") so the
+-- animation state machine can use it for sprite direction.
+---------------------------------------------------------------------------
+register_system("Update", function(world)
+    local entities = world:query({ with = { "sword", "Transform", "net_local" } })
+    for _, entity in ipairs(entities) do
+        local facing = "down"
+        for _, win in ipairs(world:query({ with = { "Window" } })) do
+            local w = win:get("Window")
+            if w and w.cursor and w.cursor.position then
+                local cp  = w.cursor.position
+                local res = w.resolution
+                local ww  = (res and (res.width  or res.physical_width))  or 1920
+                local wh  = (res and (res.height or res.physical_height)) or 1080
+                local cx  = cp.x - ww * 0.5
+                local cy  = -(cp.y - wh * 0.5)  -- flip Y
+                local ax, ay = math.abs(cx), math.abs(cy)
+                if ax > ay then
+                    facing = cx > 0 and "right" or "left"
+                else
+                    facing = cy > 0 and "up" or "down"
+                end
+            end
+        end
+        local cf = entity:get("cursor_facing")
+        if not cf or cf.dir ~= facing then
+            entity:patch({ cursor_facing = { dir = facing } })
+        end
+        ::continue::
+    end
+end, { label = "CursorFacing", after = { "Input" } })
+
+---------------------------------------------------------------------------
 -- Init: register left-mouse binding on the player's input component
 ---------------------------------------------------------------------------
 register_system("First", function(world)

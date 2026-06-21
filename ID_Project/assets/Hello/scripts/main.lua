@@ -50,10 +50,14 @@ register_system("PreUpdate", function(world)
     end
 end)
 
--- Center the window on the primary monitor at startup
+-- Set window to 1920×1080 windowed and centre on the primary monitor at startup
 register_system("First", function(world)
     for _, win in ipairs(world:query({ with = { "Window" } })) do
-        win:patch({ Window = { position = { Centered = {} } } })
+        win:patch({ Window = {
+            mode       = "Windowed",
+            resolution = { width = 1920, height = 1080 },
+            position   = { Centered = {} },
+        }})
     end
     return true
 end)

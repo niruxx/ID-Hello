@@ -158,19 +158,21 @@ register_system("PreUpdate", function(world)
         -- data so camera orbit params etc. are part of the entity from the start
         -- (prevents ModLoader base resolution from overwriting with empty defaults).
         local spawn_components = {
-            Transform = { translation = spawn_pos },
+            Transform = { translation = spawn_pos; scale = { x = 0.4, y = 0.4, z = 0.4 } },
             RigidBody2d = "KinematicVelocityBased",
             Collider2d = { capsule_y = { radius = 8.0, half_height = 10.0 } },
             LockedAxes2d = "ROTATION_LOCKED",
             Velocity2d = { linvel = { x = 0, y = 0 }, angvel = 0 },
             GravityScale2d = 0.0,
             net_owner = { client_id = client_id },
+            cursor_facing = { dir = "down" },
             net_sync = {
-                Transform = { authority = "server", reliable = false, predict = true },
-                RigidBody2d = { authority = "server" },
-                Collider2d = { authority = "server" },
-                LockedAxes2d = { authority = "server" },
+                Transform     = { authority = "server", reliable = false, predict = true },
+                RigidBody2d   = { authority = "server" },
+                Collider2d    = { authority = "server" },
+                LockedAxes2d  = { authority = "server" },
                 GravityScale2d = { authority = "server" },
+                cursor_facing = { authority = "client" },
             },
             net_peer_share = { stable_id = "player_" .. tostring(client_id) },
             net_transfer = { id = "player" },
@@ -179,7 +181,7 @@ register_system("PreUpdate", function(world)
                 { player = {} },
                 { input = { input_mode = "game", hide_cursor = false } },
                 { ["camera/2d"] = {}, net_sync = { authority = "client", target = "owner" } },
-                { ["movement/2d"] = { speed = 110.0 } },
+                { ["movement/2d"] = { speed = 40.0 } },
                 { ["animation/sprite"] = {
                     image = "character-spritesheet.png",
                     tile_size = { x = 64, y = 64 },
